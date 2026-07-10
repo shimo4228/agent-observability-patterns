@@ -1,0 +1,31 @@
+# agent-observability-patterns
+
+> Three Agent Skills (MIT) holding the observability design playbook for autonomous LLM agents: Replayable Audit Logs (per-event offline-replayable JSONL corpus), Read-Only Instruments (aggregate readings that inform the operator, never intervene), and Shadow-Mode Validation (a candidate decision mechanism runs observe-only until its record earns enforcement). Shared stance: observation precedes intervention.
+
+## Core documentation
+
+- [llms-full.txt](llms-full.txt): self-contained Q&A reference for AI agents (Project Facts, Prior Research, question-form H2 sections)
+- [README.md](README.md): human-facing narrative (install, three-patterns table, composition diagram, curation model)
+- [replayable-audit-logs SKILL.md](skills/replayable-audit-logs/SKILL.md): record schema checklist (b64+sha256 untrusted text, categorical reason codes), ground-truth discipline, replay harness with zero-wrong hard gate, corpus-driven repair loop
+- [read-only-instruments SKILL.md](skills/read-only-instruments/SKILL.md): instrument-first sequencing, signal-first test for building and removing, five invariants, three-point calibration scale, reading pitfalls
+- [shadow-mode-validation SKILL.md](skills/shadow-mode-validation/SKILL.md): observe-only entry points, isolation from shared failure machinery, hallucination-rate accounting, kill-switch by config absence, exit criteria reserved at launch
+
+## Architecture
+
+- Three patterns: **Replayable Audit Logs** (every feature with external I/O, LLM calls, or heuristic decisions ships an append-only replayable log in the same change), **Read-Only Instruments** (aggregate readings over stored state feed the operator, never gates/ranking/retrieval), **Shadow-Mode Validation** (a candidate mechanism records would-be decisions beside the live path; the record decides enforcement)
+- Composition: the log is the corpus, the instrument is a lens over it, shadow mode is the discipline of producing that corpus for a mechanism not yet allowed to act
+- Lineage anchors: append-only logs / event sourcing (audit logs), aviation-panel instruments (read-only readings), shadow deployment / dark launch (shadow mode)
+- Provenance: the "how" counterpart to [AAP ADR-0006 Causal Traceability and ADR-0005 Human Approval Gate](https://github.com/shimo4228/agent-attribution-practice/tree/main/docs/adr); manually curated generalization of the operational variant inside [Contemplative Agent](https://github.com/shimo4228/contemplative-agent)
+
+## Standard reference
+
+- [Agent Skill specification](https://agentskills.io/specification): the skill format used by this repo
+- [SkillsMP marketplace](https://agentskills.io/specification): one-step install via `/skills add shimo4228/agent-observability-patterns`
+
+## Sibling skills
+
+- [llm-agent-security-principles](https://github.com/shimo4228/llm-agent-security-principles): structural security playbook — the "how" counterpart to AAP ADR-0001..0004
+- [agent-adoption-triage](https://github.com/shimo4228/agent-adoption-triage): five-question triage routing AI work to the right quadrant — the "how" counterpart to AAP ADR-0009/0010
+- [when-code-when-llm](https://github.com/shimo4228/when-code-when-llm): decision framework for choosing deterministic code vs LLM processing per task
+- [search-first](https://github.com/shimo4228/search-first): enforces a research-before-coding workflow with a 4-way Adopt / Extend / Compose / Build decision
+- [context-sync](https://github.com/shimo4228/context-sync): audits and fixes project documentation roles

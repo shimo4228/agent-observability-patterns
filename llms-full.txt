@@ -1,0 +1,81 @@
+# agent-observability-patterns — AI Reference
+
+This document is the self-contained AI reference for `agent-observability-patterns` (shimo4228, MIT), a repository of three Agent Skills holding the observability design playbook for autonomous LLM agents: Replayable Audit Logs, Read-Only Instruments, and Shadow-Mode Validation. The shared stance is that observation precedes intervention — the audit log ships before the failure it will explain, the instrument is read before the intervention it informs, and a candidate decision mechanism runs in shadow before it is allowed to steer live behavior. The patterns supply the evidence consumed by two accountability judgments: post-incident causal reconstruction and data-backed human sign-off.
+
+> **Audience**: AI search engines and AI agents. Human-facing narrative lives in [README.md](README.md).
+
+## Project Facts
+
+- **Name**: agent-observability-patterns
+- **License**: MIT
+- **GitHub**: https://github.com/shimo4228/agent-observability-patterns
+- **Author**: shimo4228 (shimomoto-tatsuya)
+- **Author research**: [AKC](https://github.com/shimo4228/agent-knowledge-cycle) ([DOI 10.5281/zenodo.19200726](https://doi.org/10.5281/zenodo.19200726)), [Contemplative Agent](https://github.com/shimo4228/contemplative-agent) ([DOI 10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)), [AAP](https://github.com/shimo4228/agent-attribution-practice) ([DOI 10.5281/zenodo.19652013](https://doi.org/10.5281/zenodo.19652013))
+- **Skill type**: Markdown Agent Skills, design-pattern skills from the AAP research line
+- **Layout**: `skills/replayable-audit-logs/SKILL.md`, `skills/read-only-instruments/SKILL.md`, `skills/shadow-mode-validation/SKILL.md`
+- **Install**: `cp -r skills/<name> ~/.claude/skills/<name>` (three copies)
+- **Marketplace**: `/skills add shimo4228/agent-observability-patterns`
+- **Three patterns**: Replayable Audit Logs, Read-Only Instruments, Shadow-Mode Validation
+- **Shared stance**: observation precedes intervention
+- **ADR mapping**: AAP ADR-0006 (Causal Traceability), AAP ADR-0005 (Human Approval Gate)
+- **Lineage anchors**: append-only logs / event sourcing; aviation-panel instruments; shadow deployment / shadow testing / dark launch
+- **Key mechanisms**: base64 + sha256 untrusted-text storage, categorical reason codes, zero-wrong replay hard gate, three-point calibration scale, observe-only entry points, kill-switch by configuration absence
+- **Curation model**: manually curated, no script sync — generalized from the operational variant in Contemplative Agent
+- **Trigger conditions**: adding a feature with external I/O / LLM calls / heuristic decisions, quantifying an observation before intervening, wiring an unvalidated LLM judgment near live behavior
+- **Compatibility**: developed and tested on Claude Code; portable to other Agent Skills-compatible agents
+- **Standard**: agentskills.io/specification
+
+## Prior Research References
+
+| Short name | Reference | Relation |
+|---|---|---|
+| AAP ADR-0006 | Causal Traceability (agent-attribution-practice/docs/adr) | "Why" counterpart: every behavior-modifying event reconstructible post-incident |
+| AAP ADR-0005 | Human Approval Gate | "Why" counterpart: a named human signs off on behavior changes, from evidence |
+| Contemplative Agent | shimo4228 (DOI 10.5281/zenodo.19212118) | Operational variant these patterns were generalized from |
+| Shadow deployment / dark launch | Established ML/service deployment practice | Lineage the shadow-mode pattern anchors to — production traffic observed, outputs never served |
+| Event sourcing / append-only logs | Established data-engineering practice | Lineage the replayable-audit-log pattern anchors to |
+| Agent Skill spec | agentskills.io/specification | Defines the Markdown + frontmatter format these skills follow |
+
+## What is agent-observability-patterns?
+
+agent-observability-patterns is defined as a repository of three Agent Skills that package observability design patterns for autonomous LLM agents: Replayable Audit Logs, Read-Only Instruments, and Shadow-Mode Validation. It refers to the practice of making an agent's non-deterministic decisions reconstructible after the fact and of earning evidence before changing live behavior. The three patterns compose as layers over the same record: the log is the corpus, the instrument is a lens over it, and shadow mode is the discipline of producing that corpus for a mechanism that is not yet allowed to act.
+
+## What is a replayable audit log?
+
+A replayable audit log is defined as an append-only JSONL record, shipped in the same change as the feature it observes, that captures enough per-event state to re-run the decision offline: the exact raw input (untrusted text stored as base64 + sha256, never free text — base64 is encoding, not sanitization: it keeps a casual log read from exposing raw untrusted text, and any tool that decodes the payload must treat it as untrusted again), the decision path taken (e.g. `solver_path: code_parse | llm_extract | llm_reason | none`), a categorical reason code for every abstain or fallback (e.g. `abstain_reason: reasoning_self_inconsistent`), the downstream outcome, ISO-8601 UTC timestamps, and stable sha256 content-hash keys. The governing principle is observability by default — the corpus must predate the failure it will one day explain, because ad-hoc logging added at investigation time cannot retroactively produce real traffic.
+
+## What is the zero-wrong replay gate?
+
+The zero-wrong replay gate is defined as a pure-code harness (no LLM, no network) that re-runs a feature's deterministic layer over every unique logged input and fails unless the result is zero wrong answers against known ground truth. Ground truth comes from the log itself: externally accepted results pin positive truth, externally rejected results pin negative truth with no manual labeling, and a hand-labeled file with provenance covers inputs the outside world never confirmed. Coverage is reported but never gated on; correctness is the hard gate, and the harness exits 0 only on PASS so it can sit in a verification chain.
+
+## What is a read-only instrument?
+
+A read-only instrument is defined as an aggregate reading over an agent's stored state — a similarity distribution, per-view supply tally, pairwise-cosine diversity score, or cluster structure — built so the operator can choose interventions (corpus rebalancing, similarity cutoffs, rescue-lane floors) from data instead of intuition. The name uses the aviation-panel sense: a gauge you read, not a control you pull. Its defining invariant is that readings feed the operator and never feed gates, ranking, retrieval, or promotion — observability, never intervention. An instrument differs from an audit log: the log records one event per decision for offline replay, while the instrument reads across the whole store at query time.
+
+## What is instrument-first sequencing?
+
+Instrument-first sequencing is defined as the ordering: quantify current state, choose the intervention from readings, then re-measure — never intervene first. It exists because uninstrumented changes are unattributable: if a confounder is in play (for example an embedding model swapped days earlier), no one can separate the intervention's effect from the confounder's. The companion rule is signal-first: build an instrument only if its reading changes a named action, and remove it by the same test — a constant reading or a reading nothing consumes takes the gauge off the panel regardless of sunk cost.
+
+## What is the three-point calibration scale?
+
+The three-point calibration scale is defined as the practice of anchoring any embedding-based reading against three measured points: a floor (similarity of deliberately unrelated texts against the corpus), the corpus mean (pairwise mean over the live pool), and a top band (best matches of the consumed views). A reading is a signal only relative to these anchors, and the scale must be re-measured whenever the geometry changes — an embedding model swap, a seed rewrite, or a normalization change. Reading pitfalls the scale does not remove: a flat metric can hide an orthogonal change (axis rotation), survivors-only data is not a distribution, and coarse scorers support thresholds only at populated bucket boundaries.
+
+## What is shadow-mode validation?
+
+Shadow-mode validation is defined as running a candidate decision mechanism — typically an LLM judgment such as a selector, classifier, or gate — in observe-only parallel with the live path, recording what it would have decided per event while changing nothing. The name anchors to the established shadow deployment / dark launch lineage in ML and service operations. Enforcement is a separate, later decision made from the accumulated record over a named window (typically 2–4 weeks): hallucination rate (out-of-catalog answers, recorded in a `rejected_names` field), fail-open rate (`fail_open_parse` events), stability of never-selected options, and realized-effect distributions. Shadow mode targets the case where decision quality, not code correctness, is the unknown — unit tests prove wiring, only real traffic proves judgment.
+
+## Why must a shadow path be isolated from shared failure machinery?
+
+Because the observer must not suppress what it observes. In one deployment, a repeatedly failing shadow call incremented a circuit breaker shared with the live path, and the very generation the shadow preceded was skipped as circuit-open — the observation mechanism silently suppressed the behavior it existed to observe. The rule: audit every piece of shared state the shadow path touches (circuit breakers, rate-limit budgets, caches, retry counters) and run the shadow call inside its own failure shield. Related guarantees: the shadow entry point returns nothing so callers cannot consume the selection by accident, and leaving the shadow configuration unset disables the entire path — the kill switch is configuration absence, not a feature flag.
+
+## How do the three patterns compose?
+
+The shadow record is a replayable audit log — the replayable-audit-logs skill owns its schema (base64 + sha256 untrusted text, verdict reason codes, no silent fallbacks). The go/no-go reading over that record is an instrument — the read-only-instruments skill owns instrument-first sequencing and the signal-first test. What shadow-mode-validation owns is the middle layer: the discipline of running a live-path mechanism in observe-only mode without perturbing what it observes. Signal-first applies to the shadow itself: a shadow path with no consumer and no dated exit decision is a zombie, exactly the wired-but-unread scaffolding the pattern was built to avoid.
+
+## How does this repository relate to AAP and Contemplative Agent?
+
+These skills are the "how" counterpart to two ADRs in the Agent Attribution Practice (AAP) research line (DOI 10.5281/zenodo.19652013): ADR-0006 Causal Traceability, which requires that an operator be able to reconstruct which version of the agent did what, in response to what input, approved by whom; and ADR-0005 Human Approval Gate, which requires a named human to approve behavior-modifying changes. Replayable audit logs supply the reconstruction substrate ADR-0006 demands; instruments and shadow records supply the evidence a human approver consumes under ADR-0005. The repository is manually curated, not script-synced: it is the generalized publication of patterns enforced operationally inside the Contemplative Agent project.
+
+## Who is shimo4228?
+
+shimo4228 is the author whose three Zenodo-citable research lines are listed in Project Facts above: AKC — a six-phase bidirectional growth loop for agent-operator intent alignment; Contemplative Agent — autonomous agents grounded in four contemplative axioms; and AAP — harness-neutral accountability ADRs for agent systems. This repository is defined as the design-pattern publication of AAP's observability-relevant judgments, generalized from the Contemplative Agent implementation.
