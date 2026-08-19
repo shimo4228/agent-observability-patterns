@@ -1,6 +1,6 @@
 # agent-observability-patterns
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/shimo4228/agent-observability-patterns) [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/shimo4228/agent-observability-patterns)](https://gitmcp.io/shimo4228/agent-observability-patterns)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/shimo4228/agent-observability-patterns)
 
 Three [Agent Skills](https://agentskills.io/specification) holding the **observability design playbook for autonomous LLM agents**: how to make an agent's decisions reconstructible after the fact, and how to earn evidence *before* changing live behavior. General-purpose observability (APM traces, metrics dashboards) tells you what a request did; it does not tell you why a heuristic or LLM call decided what it decided, nor let you validate a new decision mechanism before it is allowed to steer behavior — that gap is what these three patterns close. The shared stance: **observation precedes intervention** — the audit log ships before the failure it will explain, the instrument is read before the intervention it informs, and a candidate mechanism runs in shadow before it is allowed to steer anything.
 
