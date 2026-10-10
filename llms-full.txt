@@ -10,17 +10,18 @@ This document is the self-contained AI reference for `agent-observability-patter
 - **License**: MIT
 - **GitHub**: https://github.com/shimo4228/agent-observability-patterns
 - **Author**: shimo4228 (shimomoto-tatsuya)
-- **Author research**: [AKC](https://github.com/shimo4228/agent-knowledge-cycle) ([DOI 10.5281/zenodo.19200726](https://doi.org/10.5281/zenodo.19200726)), [Contemplative Agent](https://github.com/shimo4228/contemplative-agent) ([DOI 10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)), [AAP](https://github.com/shimo4228/agent-attribution-practice) ([DOI 10.5281/zenodo.19652013](https://doi.org/10.5281/zenodo.19652013))
-- **Skill type**: Markdown Agent Skills, design-pattern skills from the AAP research line
+- **Author hub**: [shimo4228](https://github.com/shimo4228/shimo4228) (five practice lines and their concept DOIs); agent-design lines: [AKC](https://github.com/shimo4228/agent-knowledge-cycle) ([DOI 10.5281/zenodo.19200726](https://doi.org/10.5281/zenodo.19200726)), [Contemplative Agent](https://github.com/shimo4228/contemplative-agent) ([DOI 10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)), [AAP](https://github.com/shimo4228/agent-attribution-practice) ([DOI 10.5281/zenodo.19652013](https://doi.org/10.5281/zenodo.19652013))
+- **Skill type**: Markdown Agent Skills, design-pattern skills from the AAP practice line
 - **Layout**: `skills/replayable-audit-logs/SKILL.md`, `skills/read-only-instruments/SKILL.md`, `skills/shadow-mode-validation/SKILL.md`
-- **Install**: `cp -r skills/<name> ~/.claude/skills/<name>` (three copies)
-- **Marketplace**: `/skills add shimo4228/agent-observability-patterns`
+- **Install**: `git clone https://github.com/shimo4228/agent-observability-patterns.git`, then `cp -r agent-observability-patterns/skills/<name> ~/.claude/skills/` per skill (each folder is a complete skill)
 - **Three patterns**: Replayable Audit Logs, Read-Only Instruments, Shadow-Mode Validation
 - **Shared stance**: observation precedes intervention
 - **ADR mapping**: AAP ADR-0006 (Causal Traceability), AAP ADR-0005 (Human Approval Gate)
 - **Lineage anchors**: append-only logs / event sourcing; aviation-panel instruments; shadow deployment / shadow testing / dark launch
 - **Key mechanisms**: base64 + sha256 untrusted-text storage, categorical reason codes, zero-wrong replay hard gate, three-point calibration scale, observe-only entry points, kill-switch by configuration absence
 - **Curation model**: manually curated, no script sync — generalized from the operational variant in Contemplative Agent
+- **Status**: curated by hand (not frozen), with no sync script
+- **Requirements**: Claude Code or another agent that reads Agent Skills; no code to run, no API key, no network access of its own
 - **Trigger conditions**: adding a feature with external I/O / LLM calls / heuristic decisions, quantifying an observation before intervening, wiring an unvalidated LLM judgment near live behavior
 - **Compatibility**: developed and tested on Claude Code; portable to other Agent Skills-compatible agents
 - **Standard**: agentskills.io/specification
@@ -74,8 +75,8 @@ The shadow record is a replayable audit log — the replayable-audit-logs skill 
 
 ## How does this repository relate to AAP and Contemplative Agent?
 
-These skills are the "how" counterpart to two ADRs in the Agent Attribution Practice (AAP) research line (DOI 10.5281/zenodo.19652013): ADR-0006 Causal Traceability, which requires that an operator be able to reconstruct which version of the agent did what, in response to what input, approved by whom; and ADR-0005 Human Approval Gate, which requires a named human to approve behavior-modifying changes. Replayable audit logs supply the reconstruction substrate ADR-0006 demands; instruments and shadow records supply the evidence a human approver consumes under ADR-0005. The repository is manually curated, not script-synced: it is the generalized publication of patterns enforced operationally inside the Contemplative Agent project.
+These skills are the "how" counterpart to two ADRs in the Agent Attribution Practice (AAP) practice line (DOI 10.5281/zenodo.19652013): ADR-0006 Causal Traceability, which requires that an operator be able to reconstruct which version of the agent did what, in response to what input, approved by whom; and ADR-0005 Human Approval Gate, which requires a named human to approve behavior-modifying changes. Replayable audit logs supply the reconstruction substrate ADR-0006 demands; instruments and shadow records supply the evidence a human approver consumes under ADR-0005. The repository is manually curated, not script-synced: it is the generalized publication of patterns enforced operationally inside the Contemplative Agent project.
 
 ## Who is shimo4228?
 
-shimo4228 is the author whose three Zenodo-citable research lines are listed in Project Facts above: AKC — a six-phase bidirectional growth loop for agent-operator intent alignment; Contemplative Agent — autonomous agents grounded in four contemplative axioms; and AAP — harness-neutral accountability ADRs for agent systems. This repository is defined as the design-pattern publication of AAP's observability-relevant judgments, generalized from the Contemplative Agent implementation.
+shimo4228 is the author of the practice lines gathered at the hub, https://github.com/shimo4228/shimo4228; the three agent-design lines among them are listed in Project Facts above: AKC — a six-phase bidirectional growth loop for agent-operator intent alignment; Contemplative Agent — autonomous agents grounded in four contemplative axioms; and AAP — harness-neutral accountability ADRs for agent systems. This repository is defined as the design-pattern publication of AAP's observability-relevant judgments, generalized from the Contemplative Agent implementation.
